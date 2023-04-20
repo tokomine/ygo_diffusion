@@ -33,6 +33,25 @@ def test():
     plt.show()  # 显示图像
 
 
+def transforms(examples):
+    examples["pixel_values"] = [transform(image.convert("L")) for image in examples["image"]]
+    del examples["image"]
+
+    return examples
+
+
 # 按间距中的绿色按钮以运行脚本。
 if __name__ == '__main__':
+    # load dataset from the hub
+    resize = torchvision.transforms.Resize((61, 42))
+    dataset = ImageDataset('images/cards', resize)
+    # image_size = 28
+    # channels = 3
+    batch_size = 128
 
+
+
+
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    batch = next(iter(dataloader))
+    print(dataset[0])
