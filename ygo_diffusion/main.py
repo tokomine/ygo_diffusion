@@ -29,6 +29,7 @@ def test():
         # torchvision.transforms.Lambda(lambda t: (t * 2) - 1),
     ])
     dataset = ImageDataset('images/cards', transform)
+    print("dataset len " + str(len(dataset)))
 
     images = [dataset[i] for i in range(16)]
     grid = torchvision.utils.make_grid(images, nrow=4, padding=10, pad_value=1)  # 指定行数为4，边距为10，填充颜色为白色
@@ -75,7 +76,7 @@ if __name__ == '__main__':
 
     results_folder = Path("data/results")
     results_folder.mkdir(exist_ok=True)
-    save_and_sample_every = 1
+    save_and_sample_every = 80
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -110,10 +111,12 @@ if __name__ == '__main__':
             # save generated images
             if step != 0 and step % save_and_sample_every == 0:
                 milestone = step // save_and_sample_every
-                batches = num_to_groups(4, batch_size)
-                all_images_list = list(
-                    map(lambda n: sample(model, image_size=image_size, batch_size=n, channels=channels), batches))
-                all_images = torch.cat(all_images_list, dim=0)
+                batches = num_to_groups(batch_size, 4)
+                all_images_list = sample(model, image_size=image_size, batch_size=16, channels=channels)
+                all_images = torch.cat(list(map(lambda x: torch.from_numpy(x), all_images_list)))
                 all_images = (all_images + 1) * 0.5
-                save_image(all_images, str(results_folder / f'sample-{milestone}.png'), nrow=6)
-                print("Model save to {}".format(str(results_folder / f'sample-{milestone}.png')))
+                save_image(all_images, str(results_folder / f'sample-{epoch}-{milestone}.png'), nrow=16)
+                print("Step {} Loss:{} Model save to {}".format(step, loss.item(),
+                                                                str(results_folder / f'sample-{epoch}-{milestone}.png')))
+        torch.save(model, str(results_folder / f'model-{epoch}.pt'))
+        torch.save(model.state_dict(), str(results_folder / f'model-{epoch}.st'))
