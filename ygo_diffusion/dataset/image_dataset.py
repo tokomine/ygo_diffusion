@@ -7,10 +7,10 @@ import os
 
 
 class ImageDataset(Dataset):
-    def __init__(self, folder_path, resize=None):
+    def __init__(self, folder_path, transform=None):
         self.folder_path = folder_path
         self.image_names = os.listdir(folder_path)
-        self.resize = resize
+        self.transform = transform
 
     def __len__(self):
         return len(self.image_names)
@@ -21,7 +21,8 @@ class ImageDataset(Dataset):
         if not image_name.endswith('.jpg') and not image_name.endswith('.png'):
             return None
         image = Image.open(os.path.join(self.folder_path, image_name))
-        if self.resize is not None:
-            image = self.resize(image)
-        image = torchvision.transforms.ToTensor()(image)
+        if self.transform is not None:
+            image = self.transform(image)
+        else:
+            image = torchvision.transforms.ToTensor()(image)
         return image

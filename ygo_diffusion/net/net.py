@@ -15,7 +15,7 @@ class Residual(nn.Module):
         self.fn = fn
 
     def forward(self, x, *args, **kwargs):
-        return
+        return self.fn(x, *args, **kwargs) + x
 
 
 class SinusoidalPositionEmbeddings(nn.Module):
